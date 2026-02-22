@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --gov-navy: #0f172a;
+            --gov-blue: #1e3a8a;
+            --emerald-500: #10b981;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #ffffff; 
+            color: #1e293b; 
+            margin: 0;
+            overflow: hidden; 
+        }
+
+        /* Sidebar Styling */
+        #sidebar {
+            background-color: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-item { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 6px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #64748b;
+            font-weight: 600;
+            width: calc(100% - 32px);
+            text-align: left;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .sidebar-item:hover { background: #f8fafc; color: var(--gov-blue); }
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.2);
+        }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; transition: all 0.3s; }
+        .active .status-dot { background: white; box-shadow: 0 0 8px white; }
+        .is-done .status-dot { background: #10b981; box-shadow: 0 0 8px #10b981; }
+
+        /* Form Area Styling */
+        .header-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        }
+
+        .gov-card {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--gov-blue);
+            letter-spacing: 0.1em;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section-title::after { content: ""; flex: 1; height: 1px; background: #f1f5f9; }
+
+        .input-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .input-ui {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #f1f5f9;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: #fcfdfe;
+        }
+
+        .input-ui:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.05);
+        }
+
+        /* Readonly / Disabled state for Shared Identity */
+        .input-ui:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: white;
+            padding: 18px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            width: 100%;
+            transition: 0.3s;
+            box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.3);
+        }
+
+        .btn-save:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Table Styles */
+        .dynamic-table th { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; text-align: left; padding: 12px; border-bottom: 2px solid #f1f5f9; }
+        .dynamic-table td { padding: 8px; border-bottom: 1px solid #f8fafc; }
+
+        /* Custom Scrollbar */
+        .scroll-container::-webkit-scrollbar { width: 6px; }
+        .scroll-container::-webkit-scrollbar-track { background: transparent; }
+        .scroll-container::-webkit-scrollbar-thumb { background: #f1f5f9; border-radius: 10px; }
+        .scroll-container::-webkit-scrollbar-thumb:hover { background: #e2e8f0; }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- SIDEBAR NAV (Fixed) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 flex flex-col z-50">
+        <div class="h-28 flex items-center px-10 shrink-0">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-blue-900 rounded-xl flex items-center justify-center text-amber-400 font-black text-xl shadow-lg">S</div>
+                <div>
+                    <span class="text-slate-900 text-lg font-black block leading-tight">SIMONI</span>
+                    <span class="text-blue-700 text-[9px] font-bold uppercase tracking-widest block">Input Data Fakta</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto pt-4">
+            <p class="px-10 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Lembaga LKD</p>
+            <button onclick="setForm('LPM')" id="menu-LPM" class="sidebar-item active"><div class="status-dot"></div> LPM</button>
+            <button onclick="setForm('PKK')" id="menu-PKK" class="sidebar-item"><div class="status-dot"></div> PKK</button>
+            <button onclick="setForm('POSYANDU')" id="menu-POSYANDU" class="sidebar-item"><div class="status-dot"></div> POSYANDU</button>
+            <button onclick="setForm('RT')" id="menu-RT" class="sidebar-item"><div class="status-dot"></div> RT / RW</button>
+            <button onclick="setForm('KARANG TARUNA')" id="menu-KARANG TARUNA" class="sidebar-item"><div class="status-dot"></div> KARANG TARUNA</button>
+            
+            <p class="px-10 py-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Lembaga LAD</p>
+            <button onclick="setForm('LAD')" id="menu-LAD" class="sidebar-item"><div class="status-dot"></div> LEMBAGA ADAT</button>
+        </nav>
+
+        <div class="p-8 border-t border-slate-50">
+            <button onclick="handleLogoutSPA()" class="w-full py-3 bg-slate-50 text-slate-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all">Keluar Sesi</button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT (Scrollable) -->
+    <main class="flex-1 lg:ml-72 flex flex-col h-screen bg-[#ffffff]">
+        
+        <!-- Header (Fixed at top of main) -->
+        <header class="h-28 header-gradient flex items-center justify-between px-12 shrink-0 text-white z-40">
+            <div>
+                <h2 class="text-2xl font-black tracking-tight" id="active-title">Input Data LPM</h2>
+                <div class="flex items-center gap-3 mt-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <p class="text-[11px] text-blue-100 font-bold uppercase tracking-[0.2em]" id="display-desa">Nama Desa</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="save-status" class="hidden px-4 py-2 bg-white/10 border border-white/20 rounded-full text-[10px] font-black uppercase tracking-widest">Data Terinput</div>
+                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-xs font-black" id="user-initial">SA</div>
+            </div>
+        </header>
+
+        <!-- Form Scroll Container -->
+        <div class="flex-1 overflow-y-auto p-12 scroll-container bg-[#fcfdfe]">
+            <div class="max-w-4xl mx-auto">
+                
+                <form id="master-form" onsubmit="handleFormSubmit(event)" class="animate-fade-in">
+                    
+                    <!-- HIDDEN METADATA -->
+                    <input type="hidden" name="ID_ENTRY" id="f-id-entry">
+                    <input type="hidden" name="TIPE_ENTRY" id="f-tipe-entry" value="LKD">
+                    <input type="hidden" name="JENIS_LKD" id="f-jenis-lkd" value="LPM">
+                    <input type="hidden" name="ID_DESA" id="f-id-desa">
+                    <input type="hidden" name="KABUPATEN" id="f-kab">
+                    <input type="hidden" name="KECAMATAN" id="f-kec">
+                    <input type="hidden" name="DESA" id="f-des">
+
+                    <!-- SEKSI 1: IDENTITAS -->
+                    <div class="gov-card relative overflow-hidden">
+                        <div id="identity-locked-badge" class="hidden absolute top-0 right-0 bg-emerald-500 text-white text-[8px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-lg z-10">Data Wilayah Sinkron</div>
+                        <div class="section-title">I. Identitas Desa & Kepala Desa</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="input-group">
+                                <label>Nama Kepala Desa / Lurah</label>
+                                <input type="text" name="KADES_NAMA" id="f-kades-nama" class="input-ui" required placeholder="Nama Lengkap & Gelar">
+                            </div>
+                            <div class="input-group">
+                                <label>Jenis Kelamin Kades</label>
+                                <select name="KADES_GENDER" id="f-kades-gender" class="input-ui">
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Nomor HP/WA Kepala Desa</label>
+                                <input type="tel" name="KADES_HP" id="f-kades-hp" class="input-ui" required placeholder="08XXXXXXXXXX">
+                            </div>
+                            <div class="input-group">
+                                <label>Alamat Kantor Desa/Lurah</label>
+                                <input type="text" name="KANTOR_DESA_ALAMAT" id="f-kades-alamat" class="input-ui" placeholder="Jl. Raya No...">
+                            </div>
+                        </div>
+                        <p id="identity-lock-note" class="hidden text-[8px] font-bold text-emerald-600 mt-4 italic">* Bagian ini terisi otomatis dari data lembaga lain di desa Anda untuk menghindari duplikasi.</p>
+                    </div>
+
+                    <!-- SEKSI 2: LEGALITAS -->
+                    <div class="gov-card">
+                        <div class="section-title">II. Identitas & Legalitas Lembaga</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="input-group md:col-span-2">
+                                <label id="label-nama-lembaga">Nama Lembaga (Sesuai SK)</label>
+                                <input type="text" name="NAMA_LEMBAGA" id="f-nama-lembaga" class="input-ui" required placeholder="Contoh: LPM Desa Makmur">
+                            </div>
+                            
+                            <div id="group-pkk-sub" class="input-group" style="display:none">
+                                <label>Sub Unit / Kelompok PKK</label>
+                                <select name="SUB_UNIT_PKK" class="input-ui">
+                                    <option value="DESA">Tingkat Desa</option>
+                                    <option value="DUSUN">Tingkat Dusun</option>
+                                    <option value="DASA_WISMA">Dasa Wisma</option>
+                                </select>
+                            </div>
+                            <div id="group-unit-no" class="input-group" style="display:none">
+                                <label>Nomor RT / RW / Unit</label>
+                                <input type="text" name="NOMOR_UNIT" class="input-ui" placeholder="Contoh: 001">
+                            </div>
+                            <div id="group-wilayah-adat" class="input-group md:col-span-2" style="display:none">
+                                <label>Wilayah Adat / Etnis (LAD)</label>
+                                <input type="text" name="WILAYAH_ADAT" class="input-ui" placeholder="Contoh: Tolaki / Buton / Muna">
+                            </div>
+
+                            <div class="input-group">
+                                <label>Nomor SK Kepengurusan</label>
+                                <input type="text" name="SK_NOMOR" class="input-ui" placeholder="No. 123/SK/2024">
+                            </div>
+                            <div class="input-group">
+                                <label>Tahun Penerbitan SK</label>
+                                <input type="number" name="SK_TAHUN" class="input-ui" placeholder="2024">
+                            </div>
+                            <div class="input-group" id="group-perdes">
+                                <label>Memiliki Perdes / Peraturan Desa?</label>
+                                <select name="PERDES_ADA" class="input-ui">
+                                    <option value="Tidak">Tidak</option>
+                                    <option value="Ya">Ya</option>
+                                </select>
+                            </div>
+                            <div class="input-group" id="group-perdes-no">
+                                <label>Nomor & Tahun Perdes</label>
+                                <input type="text" name="PERDES_NOMOR" class="input-ui" placeholder="No. XX Tahun XXXX">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEKSI 3: SARANA -->
+                    <div class="gov-card">
+                        <div class="section-title">III. Sarana Prasarana & Sekretariat</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="input-group" id="group-sekre">
+                                <label>Keberadaan Kantor/Sekretariat</label>
+                                <select name="ADA_SEKRETARIAT" class="input-ui">
+                                    <option value="Tidak">Tidak Ada</option>
+                                    <option value="Ada">Ada</option>
+                                </select>
+                            </div>
+                            <div class="input-group" id="group-balai" style="display:none">
+                                <label>Keberadaan Balai Adat</label>
+                                <select name="ADA_BALAI" class="input-ui">
+                                    <option value="Tidak">Tidak Ada</option>
+                                    <option value="Ada">Ada</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Sarana Kerja Utama</label>
+                                <input type="text" name="SARANA_KERJA" class="input-ui" placeholder="Meja, Kursi, Komputer, dll">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEKSI 4: PARTISIPASI -->
+                    <div class="gov-card" id="section-partisipasi">
+                        <div class="section-title">IV. Partisipasi Musyawarah & Dokumen Kerja</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                            <label class="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl cursor-pointer hover:border-blue-200 transition-all">
+                                <input type="checkbox" name="IKUT_MUSDES" value="Ya" class="w-5 h-5 rounded border-slate-300 text-blue-900 focus:ring-blue-900">
+                                <span class="text-xs font-black uppercase tracking-tight">Ikut Musyawarah Desa</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl cursor-pointer hover:border-blue-200 transition-all">
+                                <input type="checkbox" name="IKUT_MUSRENBANG" value="Ya" class="w-5 h-5 rounded border-slate-300 text-blue-900 focus:ring-blue-900">
+                                <span class="text-xs font-black uppercase tracking-tight">Ikut Musrenbangdes</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl cursor-pointer hover:border-blue-200 transition-all">
+                                <input type="checkbox" name="IKUT_RPJM" value="Ya" class="w-5 h-5 rounded border-slate-300 text-blue-900 focus:ring-blue-900">
+                                <span class="text-xs font-black uppercase tracking-tight">Ikut Penyusunan RPJMDes</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl cursor-pointer hover:border-blue-200 transition-all">
+                                <input type="checkbox" name="IKUT_RKP" value="Ya" class="w-5 h-5 rounded border-slate-300 text-blue-900 focus:ring-blue-900">
+                                <span class="text-xs font-black uppercase tracking-tight">Ikut Penyusunan RKPDes</span>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="input-group">
+                                <label>Memiliki Dokumen Kerja (AD/ART)?</label>
+                                <select name="DOK_KERJA_ADA" class="input-ui">
+                                    <option value="Tidak">Tidak Ada</option>
+                                    <option value="Ya">Ada</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Jenis Dokumen Kerja</label>
+                                <input type="text" name="DOK_KERJA_JENIS" class="input-ui" placeholder="AD/ART & Program Kerja">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEKSI 5: KAPASITAS & ANGGARAN -->
+                    <div class="gov-card">
+                        <div class="section-title">V. Anggaran & Peningkatan Kapasitas</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="input-group">
+                                <label>Dukungan Anggaran Operasional?</label>
+                                <select name="ANGGARAN_ADA" class="input-ui">
+                                    <option value="Tidak">Tidak Ada</option>
+                                    <option value="Ya">Ada</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Jumlah Anggaran per Tahun (Rp)</label>
+                                <input type="number" name="ANGGARAN_JUMLAH" class="input-ui" placeholder="0">
+                            </div>
+                            <div class="input-group">
+                                <label>Pernah Ikut Bimtek/Pelatihan?</label>
+                                <select name="KAPASITAS_ADA" class="input-ui">
+                                    <option value="Tidak">Belum Pernah</option>
+                                    <option value="Ya">Pernah</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Memiliki Laporan Akhir Kegiatan?</label>
+                                <select name="ADA_LAPORAN_AKHIR" class="input-ui">
+                                    <option value="Tidak">Belum Ada</option>
+                                    <option value="Ya">Sudah Ada</option>
+                                </select>
+                            </div>
+                            <div class="input-group md:col-span-2" id="group-sengketa" style="display:none">
+                                <label>Catatan Penanganan Sengketa Adat (LAD)</label>
+                                <textarea name="SENGKETA_JENIS" class="input-ui" rows="2" placeholder="Sebutkan sengketa yang ditangani..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEKSI VI: STRUKTUR PENGURUS (DINAMIS) -->
+                    <div class="gov-card">
+                        <div class="section-title">VI. Struktur Pengurus Inti</div>
+                        <div class="overflow-x-auto mb-6">
+                            <table class="w-full dynamic-table">
+                                <thead>
+                                    <tr>
+                                        <th width="40%">Nama Pengurus</th>
+                                        <th width="20%">JK</th>
+                                        <th width="30%">Jabatan</th>
+                                        <th width="10%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pengurus-body"></tbody>
+                            </table>
+                        </div>
+                        <button type="button" onclick="addPengurusRow()" class="px-4 py-2 border-2 border-dashed border-slate-200 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:border-blue-400 hover:text-blue-600 transition-all w-full">+ Tambah Baris Pengurus</button>
+                    </div>
+
+                    <!-- SEKSI VII: RIWAYAT KEGIATAN (DINAMIS) -->
+                    <div class="gov-card">
+                        <div class="section-title">VII. Riwayat Kegiatan Lembaga</div>
+                        <div class="overflow-x-auto mb-6">
+                            <table class="w-full dynamic-table">
+                                <thead>
+                                    <tr>
+                                        <th width="35%">Nama Kegiatan</th>
+                                        <th width="15%">Thn</th>
+                                        <th width="20%">Dana</th>
+                                        <th width="20%">Output</th>
+                                        <th width="10%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kegiatan-body"></tbody>
+                            </table>
+                        </div>
+                        <button type="button" onclick="addKegiatanRow()" class="px-4 py-2 border-2 border-dashed border-slate-200 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:border-emerald-400 hover:text-emerald-600 transition-all w-full">+ Tambah Baris Kegiatan</button>
+                    </div>
+
+                    <!-- TOMBOL SIMPAN -->
+                    <div class="mb-24">
+                        <button type="submit" id="btn-submit" class="btn-save">Simpan Laporan & Sinkronisasi Skor</button>
+                        <p class="text-[9px] text-center text-slate-300 font-bold uppercase mt-8 tracking-[0.4em]">Pemerintah Provinsi Sulawesi Tenggara • SIMONI Digital</p>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loader" class="fixed inset-0 bg-white/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center hidden">
+        <div class="w-16 h-16 border-4 border-slate-100 border-t-blue-900 rounded-full animate-spin"></div>
+        <p class="mt-6 text-[11px] font-black text-slate-500 uppercase tracking-widest">Sinkronisasi Database...</p>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentKategori = 'LPM';
+        let currentType = 'LKD';
+        let isProcessing = false;
+        let villageSubmissions = {}; // Penampung data seluruh desa
+
+        window.addEventListener('view-form-active', () => {
+            currentUser = window.initialUser;
+            initForm();
+        });
+
+        function initForm() {
+            if (!currentUser) return;
+            document.getElementById('display-desa').innerText = currentUser.namaWilayah || "Wilayah Tidak Diketahui";
+            document.getElementById('user-initial').innerText = (currentUser.username || "SA").substring(0,2).toUpperCase();
+            document.getElementById('f-id-desa').value = currentUser.idDesa || "";
+            document.getElementById('f-kab').value = currentUser.detail?.kab || "";
+            document.getElementById('f-kec').value = currentUser.detail?.kec || "";
+            document.getElementById('f-des').value = currentUser.detail?.des || "";
+            
+            // Ambil status seluruh desa untuk sinkronisasi identitas
+            google.script.run.withSuccessHandler(res => {
+                if (res.success) villageSubmissions = res.data;
+                if (!currentKategori) setForm('LPM');
+                else setForm(currentKategori);
+            }).getVillageSubmissionsStatus();
+        }
+
+        function setForm(kat) {
+            if (isProcessing) return;
+            currentKategori = kat;
+            currentType = (kat === 'LAD') ? 'LAD' : 'LKD';
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById('menu-' + kat);
+            if(activeBtn) activeBtn.classList.add('active');
+            document.getElementById('active-title').innerText = "Input Data " + kat;
+            document.getElementById('f-jenis-lkd').value = kat;
+            document.getElementById('f-tipe-entry').value = currentType;
+            const isLad = (currentType === 'LAD');
+            document.getElementById('group-sekre').style.display = isLad ? 'none' : 'block';
+            document.getElementById('group-balai').style.display = isLad ? 'block' : 'none';
+            document.getElementById('section-partisipasi').style.display = isLad ? 'none' : 'block';
+            document.getElementById('group-sengketa').style.display = isLad ? 'block' : 'none';
+            document.getElementById('group-pkk-sub').style.display = (kat === 'PKK') ? 'block' : 'none';
+            document.getElementById('group-unit-no').style.display = (kat === 'RT' || kat === 'RW') ? 'block' : 'none';
+            document.getElementById('group-wilayah-adat').style.display = isLad ? 'block' : 'none';
+            const labelNama = document.getElementById('label-nama-lembaga');
+            const inputNama = document.getElementById('f-nama-lembaga');
+            if (isLad) { labelNama.innerText = "Nama Lembaga Adat (LAD)"; inputNama.name = "NAMA_LAD"; } 
+            else { labelNama.innerText = "Nama Lembaga (Sesuai SK)"; inputNama.name = "NAMA_LEMBAGA"; }
+            
+            resetFormWithMetadata();
+            loadExistingData(kat);
+        }
+
+        function resetFormWithMetadata() {
+            const form = document.getElementById('master-form');
+            form.reset();
+            document.getElementById('pengurus-body').innerHTML = ""; 
+            document.getElementById('kegiatan-body').innerHTML = ""; 
+            
+            // Reset status readonly identitas
+            toggleIdentityFields(false);
+            
+            initForm();
+        }
+
+        /**
+         * Sinkronisasi Identitas Desa (Seksi I)
+         */
+        function checkAndSyncSharedIdentity(currentData) {
+            // Jika data saat ini sudah punya identitas, pakai itu
+            if (currentData && currentData.KADES_NAMA) {
+                fillIdentityFields(currentData);
+                return;
+            }
+
+            // Jika data saat ini kosong, cari di submission lembaga lain di desa tersebut
+            let sharedIdentity = null;
+            for (let key in villageSubmissions) {
+                if (villageSubmissions[key].KADES_NAMA) {
+                    sharedIdentity = villageSubmissions[key];
+                    break;
+                }
+            }
+
+            if (sharedIdentity) {
+                fillIdentityFields(sharedIdentity);
+                toggleIdentityFields(true); // Kunci karena sudah ada lembaga lain yang input
+            }
+        }
+
+        function fillIdentityFields(data) {
+            document.getElementById('f-kades-nama').value = data.KADES_NAMA || "";
+            document.getElementById('f-kades-gender').value = data.KADES_GENDER || "L";
+            document.getElementById('f-kades-hp').value = data.KADES_HP || "";
+            document.getElementById('f-kades-alamat').value = data.KANTOR_DESA_ALAMAT || "";
+        }
+
+        function toggleIdentityFields(isLocked) {
+            const fields = ['f-kades-nama', 'f-kades-gender', 'f-kades-hp', 'f-kades-alamat'];
+            fields.forEach(id => {
+                document.getElementById(id).disabled = isLocked;
+            });
+            
+            if (isLocked) {
+                document.getElementById('identity-locked-badge').classList.remove('hidden');
+                document.getElementById('identity-lock-note').classList.remove('hidden');
+            } else {
+                document.getElementById('identity-locked-badge').classList.add('hidden');
+                document.getElementById('identity-lock-note').classList.add('hidden');
+            }
+        }
+
+        function addPengurusRow(data = {}) {
+            const tbody = document.getElementById('pengurus-body');
+            const row = document.createElement('tr');
+            row.className = "animate-fade-in";
+            row.innerHTML = `
+                <td><input type="text" name="pengurus_nama[]" class="input-ui text-xs" value="${data.nama || ''}" placeholder="Nama Lengkap"></td>
+                <td>
+                    <select name="pengurus_jk[]" class="input-ui text-xs">
+                        <option value="L" ${data.gen === 'L' ? 'selected' : ''}>L</option>
+                        <option value="P" ${data.gen === 'P' ? 'selected' : ''}>P</option>
+                    </select>
+                </td>
+                <td><input type="text" name="pengurus_jabatan[]" class="input-ui text-xs" value="${data.jab || ''}" placeholder="Jabatan"></td>
+                <td class="text-center">
+                    <button type="button" onclick="this.closest('tr').remove()" class="text-rose-400 hover:text-rose-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function addKegiatanRow(data = {}) {
+            const tbody = document.getElementById('kegiatan-body');
+            const row = document.createElement('tr');
+            row.className = "animate-fade-in";
+            row.innerHTML = `
+                <td><input type="text" name="keg_nama[]" class="input-ui text-xs" value="${data.nama || ''}" placeholder="Kegiatan"></td>
+                <td><input type="number" name="keg_thn[]" class="input-ui text-xs" value="${data.thn || ''}" placeholder="Thn"></td>
+                <td><input type="number" name="keg_dana[]" class="input-ui text-xs" value="${data.dana || ''}" placeholder="Anggaran"></td>
+                <td><input type="text" name="keg_output[]" class="input-ui text-xs" value="${data.output || ''}" placeholder="Keterangan"></td>
+                <td class="text-center">
+                    <button type="button" onclick="this.closest('tr').remove()" class="text-rose-400 hover:text-rose-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function loadExistingData(kat) {
+            const idEntry = currentType + "_" + (currentUser?.idDesa || "NON") + "_" + kat.replace(/\s+/g, '_');
+            document.getElementById('f-id-entry').value = idEntry;
+            document.getElementById('loader').classList.remove('hidden');
+            isProcessing = true;
+            google.script.run.withSuccessHandler(res => {
+                document.getElementById('loader').classList.add('hidden');
+                isProcessing = false;
+                
+                if (res.success && res.data) {
+                    fillForm(res.data);
+                    document.getElementById('save-status').classList.remove('hidden');
+                    document.getElementById('menu-' + kat).classList.add('is-done');
+                    if (res.data.pengurus_detail) res.data.pengurus_detail.forEach(p => addPengurusRow(p));
+                    if (res.data.kegiatan_detail) res.data.kegiatan_detail.forEach(k => addKegiatanRow(k));
+                } else {
+                    document.getElementById('save-status').classList.add('hidden');
+                    document.getElementById('menu-' + kat).classList.remove('is-done');
+                }
+                
+                // Jalankan sinkronisasi identitas setelah memuat data (atau data kosong)
+                checkAndSyncSharedIdentity(res.data);
+                
+            }).getRecordDetail(idEntry, currentType);
+        }
+
+        function fillForm(data) {
+            const form = document.getElementById('master-form');
+            for (let key in data) {
+                const input = form.elements[key];
+                if (input && input.type !== 'checkbox') input.value = data[key] || "";
+                else if (input && input.type === 'checkbox') input.checked = (data[key] === 'Ya' || data[key] === true);
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            if (isProcessing) return;
+            const form = e.target;
+            const btn = document.getElementById('btn-submit');
+            document.getElementById('loader').classList.remove('hidden');
+            btn.disabled = true;
+            isProcessing = true;
+            
+            // Re-enable temporarily to collect data if they were locked
+            const identityFields = ['f-kades-nama', 'f-kades-gender', 'f-kades-hp', 'f-kades-alamat'];
+            identityFields.forEach(id => document.getElementById(id).disabled = false);
+
+            const formData = new FormData(form);
+            const obj = {};
+            formData.forEach((val, key) => { if(!key.includes('[]')) obj[key] = val; });
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => { obj[cb.name] = cb.checked ? "Ya" : "Tidak"; });
+
+            // Pengurus & Kegiatan
+            const listPengurus = [];
+            const pNames = form.querySelectorAll('[name="pengurus_nama[]"]');
+            const pJks = form.querySelectorAll('[name="pengurus_jk[]"]');
+            const pJabs = form.querySelectorAll('[name="pengurus_jabatan[]"]');
+            pNames.forEach((n, i) => { if(n.value) listPengurus.push({ nama: n.value, gen: pJks[i].value, jab: pJabs[i].value }); });
+            obj.PENGURUS_DATA = listPengurus;
+
+            const listKegiatan = [];
+            const kNames = form.querySelectorAll('[name="keg_nama[]"]');
+            const kThns = form.querySelectorAll('[name="keg_thn[]"]');
+            const kDanas = form.querySelectorAll('[name="keg_dana[]"]');
+            const kOuts = form.querySelectorAll('[name="keg_output[]"]');
+            kNames.forEach((n, i) => { if(n.value) listKegiatan.push({ nama: n.value, thn: kThns[i].value, dana: kDanas[i].value, output: kOuts[i].value }); });
+            obj.KEGIATAN_DATA = listKegiatan;
+
+            google.script.run.withSuccessHandler(res => {
+                document.getElementById('loader').classList.add('hidden');
+                btn.disabled = false; isProcessing = false;
+                if (res.success) { 
+                    alert(`Data Tersinkron!\nSkor: ${res.score || 0}`); 
+                    // Update cache lokal sebelum reload data
+                    initForm(); 
+                } 
+                else { alert("Gagal: " + res.message); }
+            }).processDataEntry(obj);
+        }
+
+        function handleLogoutSPA() {
+            google.script.run.withSuccessHandler(() => location.reload()).logoutUser();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Reset total untuk memberikan kebebasan tata letak penuh pada anak */
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .view-container {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Menggunakan display: block agar Dashboard/AdminPanel bisa mengatur tata letaknya sendiri */
+    .view-container.active {
+      display: block;
+    }
+    
+    #global-loader {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f1f5f9;
+      border-top: 4px solid #1e3a8a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="global-loader">
+    <div class="spinner"></div>
+  </div>
+
+  <div id="view-index" class="view-container active">
+    <?!= include('Index'); ?>
+  </div>
+  
+  <div id="view-dashboard" class="view-container">
+    <?!= include('Dashboard'); ?>
+  </div>
+  
+  <div id="view-form" class="view-container">
+    <?!= include('FormInput'); ?>
+  </div>
+
+  <!-- VIEW KHUSUS SUPER ADMIN -->
+  <div id="view-admin" class="view-container">
+    <?!= include('AdminPanel'); ?>
+  </div>
+
+  <script>
+    window.initialUser = null;
+
+    window.addEventListener('load', () => {
+      var startPage = "<?= initialPage ?>"; 
+      if (startPage && startPage !== 'index' && startPage !== 'App') {
+          showView(startPage.toLowerCase());
+      } else {
+          document.getElementById('global-loader').style.display = 'none';
+      }
+    });
+
+    /**
+     * Berpindah antar halaman secara SPA
+     */
+    function showView(viewId) {
+      const loader = document.getElementById('global-loader');
+      loader.style.display = 'flex';
+
+      document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+      
+      const target = document.getElementById('view-' + viewId);
+      if (target) {
+        target.classList.add('active');
+        setTimeout(() => {
+          // Trigger event khusus untuk inisialisasi script pada halaman tujuan
+          window.dispatchEvent(new CustomEvent('view-' + viewId + '-active'));
+          loader.style.display = 'none';
+        }, 300);
+      } else {
+        document.getElementById('view-index').classList.add('active');
+        loader.style.display = 'none';
+      }
+    }
+
+    function updateUserSession(user) {
+      window.initialUser = user;
+    }
+
+    function handleLogoutSPA() {
+      google.script.run.withSuccessHandler(() => {
+          window.initialUser = null;
+          showView('index');
+      }).logoutUser();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* Latar Belakang: Abstrak Profesional & Ringan */
+        .bg-custom {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%), 
+                        url('https://images.unsplash.com/photo-1614850523296-e84529fdad4d?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism Effect yang lebih solid & profesional */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-minimal {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-minimal:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Entrance Animation */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-premium {
+            animation: fadeInScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .btn-shimmer::after {
+            content: "";
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.6s;
+        }
+        .btn-shimmer:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+        .btn-shimmer:hover::after {
+            left: 120%;
+        }
+    </style>
+</head>
+<body class="bg-custom min-h-screen">
+
+    <!-- Kontainer Utama -->
+    <div class="flex items-center justify-center min-h-screen w-full p-6">
+        
+        <div class="w-full max-w-[340px] animate-premium">
+            
+            <!-- Logo Section - Lebih Padat -->
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl mb-4 relative group">
+                    <span class="text-white text-xl font-black relative z-10">S</span>
+                    <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <h1 class="text-xl font-extrabold text-white tracking-tight uppercase leading-none">
+                    SIMONI <span class="text-blue-400">SULTRA</span>
+                </h1>
+                <p class="text-slate-400 text-[8px] font-bold uppercase tracking-[0.3em] mt-2 opacity-80">
+                    Sistem Monitoring Digital
+                </p>
+            </div>
+
+            <!-- Modern Glass Login Card - Ukuran Padat -->
+            <div class="glass-card rounded-[2rem] p-7">
+                <div class="mb-6 text-center">
+                    <h2 class="text-lg font-bold text-white tracking-tight leading-tight">Login</h2>
+                    <p class="text-slate-400 text-[10px] mt-1 font-medium opacity-90">Gunakan akun resmi wilayah Anda.</p>
+                </div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <!-- Username -->
+                    <div class="space-y-1.5">
+                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Pengguna</label>
+                        <div class="relative flex items-center">
+                            <span class="absolute left-4 text-slate-500">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            </span>
+                            <input type="text" id="username" required
+                                class="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-[11px] outline-none input-minimal placeholder-slate-600 font-medium"
+                                placeholder="username_wilayah">
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="space-y-1.5">
+                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Kata Sandi</label>
+                        <div class="relative flex items-center">
+                            <span class="absolute left-4 text-slate-500">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2a3 3 0 01-3 3H6a3 3 0 01-3-3v-2m33 0v2a3 3 0 003 3h3a3 3 0 003-3v-2m-9-3h9m-9 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </span>
+                            <input type="password" id="password" required
+                                class="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl text-white text-[11px] outline-none input-minimal placeholder-slate-600 font-medium"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div id="error-msg" class="hidden">
+                        <div class="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+                            <div class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>
+                            <p class="text-[9px] font-bold text-rose-200" id="error-text"></p>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-1">
+                        <button type="submit" id="btnLogin" 
+                            class="btn-shimmer w-full bg-blue-700 text-white font-extrabold py-3 rounded-xl shadow-lg shadow-blue-900/20 active:scale-[0.98] flex items-center justify-center gap-2 text-[9px] tracking-[0.2em] uppercase">
+                            <span id="btnText">Masuk Sekarang</span>
+                            <div id="loader" class="hidden w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Footer Card - Lebih Rapat -->
+                <div class="mt-6 pt-5 border-t border-white/5 text-center">
+                    <p class="text-[7px] font-bold text-slate-500 uppercase tracking-[0.25em]">
+                        DPMD Prov. Sulawesi Tenggara
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Reset Tampilan Login ke Keadaan Awal
+         */
+        window.addEventListener('view-index-active', () => {
+            const btn = document.getElementById('btnLogin');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const err = document.getElementById('error-msg');
+            
+            btn.disabled = false;
+            loader.classList.add('hidden');
+            btnText.innerText = "Masuk Sekarang";
+            err.classList.add('hidden');
+            
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        });
+
+        /**
+         * Menangani proses login dan transisi SPA
+         */
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const btn = document.getElementById('btnLogin');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const err = document.getElementById('error-msg');
+            const errText = document.getElementById('error-text');
+
+            err.classList.add('hidden');
+            btn.disabled = true;
+            loader.classList.remove('hidden');
+            btnText.innerText = "VERIFIKASI...";
+
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    if (res.success) {
+                        if (typeof updateUserSession === 'function') {
+                            updateUserSession(res.user);
+                        }
+                        if (typeof showView === 'function') {
+                            showView(res.targetPage);
+                        }
+                    } else {
+                        errText.innerText = res.message || "Login Gagal.";
+                        err.classList.remove('hidden');
+                        btn.disabled = false;
+                        loader.classList.add('hidden');
+                        btnText.innerText = "Masuk Sekarang";
+                    }
+                })
+                .withFailureHandler(function(e) {
+                    errText.innerText = "Error: " + e.toString();
+                    err.classList.remove('hidden');
+                    btn.disabled = false;
+                    loader.classList.add('hidden');
+                    btnText.innerText = "Masuk Sekarang";
+                })
+                .loginUser(u, p);
+        }
+    </script>
+</body>
+</html>
